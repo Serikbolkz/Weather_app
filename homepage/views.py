@@ -8,19 +8,22 @@ from django.contrib import messages
 def index(request):
     WEATHER_API_KEY = settings.WEATHER_API_KEY
     url = 'http://api.openweathermap.org/data/2.5/weather?q={}&units=imperial&appid=' + WEATHER_API_KEY
-
+    cities = City.objects.all()
+    
     if request.method == 'POST':
         form = CityForm(request.POST)
         if form.is_valid():
             city_name = form.cleaned_data['name']
-            api_response = requests.get(url.format(city_name)).json()
-
+            api_response = requests.get(url.format(city_name)).json()  
             if api_response.get('main'):
                 form.save()
                 return redirect('index')
             else:
                 messages.error(request,'City not found')
                 return redirect('index')
+        else:
+            messages.error(request,'City already is shown')
+            return redirect('index')
     else:
         form = CityForm()
 
